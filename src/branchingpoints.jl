@@ -1,4 +1,5 @@
 using StaticArrays
+using DSP 
 
 function branch_weight(bit_img,x,y)
     BSA = SA[0 1 0; 1 0 1; 0 1 0]
@@ -22,6 +23,27 @@ function detect_branching_points(skelet)
                 end
             end
         end
+    end
+    return skelet_colored
+end
+
+function detect_branching_pointsv2(skelet)
+    skelet_colored = RGB.(0,skelet,0)
+    for i ∈ findall(skelet .== 1)
+        if branch_weight(skelet, i.I...) ≥ 3
+            skelet_colored[i] = RGB(1,0,0)
+        end
+    end
+    return skelet_colored
+end
+
+function detect_branching_points_conv(skelet)
+    kernel = [ 0 1 0; 1 10 1; 0 1 0]
+    conv_skelet = @view conv(kernel, skelet)[2:end-1, 2:end-1]
+    skelet_colored = RGB.(0,skelet, 0)
+
+    for i ∈ findall(conv_skelet .≥ 13)
+        skelet_colored[i] = RGB(1,0,0)
     end
     return skelet_colored
 end
