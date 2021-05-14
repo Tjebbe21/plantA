@@ -7,6 +7,7 @@ using Random, ImageView
 
 
 includet("src/K3M.jl")
+includet("src/branchingpoints.jl")
 
 
 # load image
@@ -30,6 +31,10 @@ save("output/k3m_b.gif",borders)
 skelet = results[:,:,end];
 
 
+imshow(skelet)
+
+pif = detect_branching_points(skelet)
+
 skelet_green = RGB.(0,skelet,0)
-save("output/skelet_green.jpg",skelet_green)
+save("output/branched.jpg",pif)
 
