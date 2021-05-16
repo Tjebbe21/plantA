@@ -156,10 +156,58 @@ function angles_branchingpoint!(rgb_skelet,idx,nr_steps)
     end
 end
 
+"""
+Decomposes the tree
+
+Inputs:
+    skelet: the skelet matrix
+    bp: the branch points
+
+Returns:
+    dictionary:
+        keys: (origin, target) origin/target are brnaching points/tip of the branch
+        values: the path connecting the origin and the target as a list
+"""
+function decompose_skelet(skelet, bp)
+    nodes = Set(bp)
+    edges = Set(findall(skelet .== 1))
+    # look at skelet without bp
+    setdiff!(edges, nodes)
+
+    # define neighbors
+    neighbors = [CartesianIndex(x,y) for (x,y) in [ (0,1),(1,0),(0,-1),(-1,0) ] ]
+    
+    branches = Dict()
+    for origin in bp
+        # See the potential neighbors or a bp For each we make a branch
+        nbh_bp  = intersect(Set(origin +n for n in neighbors), edges)
+        for node in nbh_bp
+            edge = [node]
+            # Remove edge from edges
+            pop!(edges, node)
+            # find new neighbors
+            nbh_idx = intersect(Set(node + n for n in neighbors), edges)
+            while length(nbh_idx) > 0
+                node = pop!(nbh_idx)
+                pop!(edges, node)
+                append!(edge,[node])
+                nbh_idx = intersect(Set(node +n for n in neighbors), edges)
+            end
+    
+            # check wether the end is another bp or the tip of a branch
+            target = intersect(Set(node + n for n in neighbors ), bp)
+            if length(target) > 0
+                branches[(origin, pop!(target))] = edge
+            else
+                branches[(origin, edge[end])] = edge[1:end-1]
+            edge = []
+            end
+        end
+    end
+    return branches
+end
+
 #----------------------------------
-
-
-
 
 """
 Paint branchingpoints and neighbors

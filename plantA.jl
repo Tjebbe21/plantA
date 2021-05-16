@@ -30,14 +30,24 @@ save("output/k3m_b.gif",borders)
 
 skelet = results[:,:,end];
 imshow(skelet)
+
 ##
 
 # Zwart wit skelet, maar met rgb type
 rgb_skelet = RGB.(skelet,skelet,skelet)
-
-##
 # indices van branchingpoints
 bp = idx_of_bp(skelet)
+
+
+##
+branches = decompose_skelet(skelet, bp)
+
+col = distinguishable_colors(length(branches), [RGB(1,1,1),RGB(.1,.1,.1)])
+for (i, edge) ∈ enumerate(values(branches))
+    c = col[i]
+    rgb_skelet[edge] .= c
+end
+imshow(rgb_skelet)
 
 ##
 # 1 kind of in the middle
