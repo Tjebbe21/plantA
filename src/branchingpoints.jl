@@ -39,6 +39,13 @@ function branchingpoints!(branchingpoints,skelet)
     end
 end
 
+function branchingpointsv2!(branchingpoints, skelet)
+    for I ∈ findall(skelet .== 1)
+        if branch_weight(skelet, I.I...) ≥ 3
+            branchingpoints[I] = 1
+        end
+    end
+end
 
 """
 returns list of CartesianIndices of branchingpoints
@@ -47,7 +54,7 @@ skelet: 1 px wide binary image
 """
 function idx_of_bp(skelet)
     branchingpoints = zero(skelet);
-    branchingpoints!(branchingpoints,skelet)
+    @time branchingpointsv2!(branchingpoints,skelet)
 
     idx_of_bp = [id for id in CartesianIndices(branchingpoints) if branchingpoints[id] == 1]
     return idx_of_bp
@@ -118,7 +125,6 @@ function few_steps_in_branch(rgb_skelet,idx,nr_steps,direction,color)
     return (direction,idx)
 end
 
-
 """
 Prints angles between branches at branchingpoint idx.
 Also colors the branches
@@ -177,27 +183,6 @@ function color_branching_points(skelet,color_bp,color_bp_nbh)
                 end
             end
         end
-    end
-    return skelet_colored
-end
-
-function detect_branching_pointsv2(skelet)
-    skelet_colored = RGB.(0,skelet,0)
-    for i ∈ findall(skelet .== 1)
-        if branch_weight(skelet, i.I...) ≥ 3
-            skelet_colored[i] = RGB(1,0,0)
-        end
-    end
-    return skelet_colored
-end
-
-function detect_branching_points_conv(skelet)
-    kernel = [ 0 1 0; 1 10 1; 0 1 0]
-    conv_skelet = @view conv(kernel, skelet)[2:end-1, 2:end-1]
-    skelet_colored = RGB.(0,skelet, 0)
-
-    for i ∈ findall(conv_skelet .≥ 13)
-        skelet_colored[i] = RGB(1,0,0)
     end
     return skelet_colored
 end

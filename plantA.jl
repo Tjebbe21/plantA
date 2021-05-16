@@ -30,33 +30,22 @@ save("output/k3m_b.gif",borders)
 
 skelet = results[:,:,end];
 imshow(skelet)
-
-##
-
-pif = detect_branching_points(skelet)
-#save("output/branched.jpg",pif)
-
-##
-
-pifv2 = detect_branching_pointsv2(skelet) 
-
-##
-
-pif_conv = detect_branching_points_conv(skelet)
-
 ##
 
 # Zwart wit skelet, maar met rgb type
 rgb_skelet = RGB.(skelet,skelet,skelet)
 
+##
 # indices van branchingpoints
 bp = idx_of_bp(skelet)
 
+##
 # 1 kind of in the middle
 idx = bp[3]
 
 # eerste stap in hoeken uitrekenen (en rgb_skelet krijgt gekleurde branches
 angles_branchingpoint!(rgb_skelet,idx,10)
+
 
 # Kleur branchpoints (en de px er om heen)
 colored_bp = color_branching_points(skelet,RGB(1,0,0),RGB(1,0,0))
@@ -70,9 +59,13 @@ for i in 1:length(bp)
     y,x = Tuple(bp[i])
     annotate!(guidict, AnnotationText(x+h_ofset, y-5, string(i), color=RGB(1,0,0), fontsize=5));
 end
-canvas = guidict["gui"]["canvas"]
+#canvas = guidict["gui"]["canvas"]
 
+##
 
+imshow(guidict)
+
+##
 # op github staat iets als dit, maar werkt niet..
 using Cairo
 function write_to_png(guidict, filename)
