@@ -38,9 +38,11 @@ rgb_skelet = RGB.(skelet,skelet,skelet)
 # indices van branchingpoints
 bp = idx_of_bp(skelet)
 
+##
+
+@time branches = decompose_skelet(skelet, bp);
 
 ##
-branches = decompose_skelet(skelet, bp)
 
 col = distinguishable_colors(length(branches), [RGB(1,1,1),RGB(.1,.1,.1)])
 for (i, edge) ∈ enumerate(values(branches))
