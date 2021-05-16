@@ -11,10 +11,8 @@ N:       Neighbourhood bit values matrix
 """
 @inline function weight(bit_img,N,x,y)
     weight = 0
-    for i ∈ 1:3
-        for j ∈ 1:3
-            weight += N[i,j] * bit_img[x+i-2,y+j-2]
-        end
+    for i ∈ 1:3, j ∈ 1:3
+        weight += N[i,j] * bit_img[x+i-2,y+j-2]
     end
     return weight
 end
@@ -46,10 +44,8 @@ function phase0!(border,bit_img,N,A0)
     # assert_boundary_background(bit_img,3)
 
     n, m = size(bit_img)
-    for x ∈ 2:n-1
-        for y ∈ 2:m-1
-            border[x,y] = weight(bit_img,N,x,y) ∈ A0
-        end
+    for x ∈ 2:n-1, y ∈ 2:m-1
+        border[x,y] = weight(bit_img,N,x,y) ∈ A0
     end 
 end
 
@@ -58,12 +54,10 @@ phase 1-5: Delete borders
 """
 function phaseᵢ!(border,bit_img,N,A)
     n,m = size(border)
-    for x in 2:n-1
-        for y in 2:m-1
-            if border[x,y] == 1
-                if weight(bit_img,N,x,y) ∈ A
-                    bit_img[x,y] = 0
-                end
+    for x in 2:n-1, y in 2:m-1
+        if border[x,y] == 1
+            if weight(bit_img,N,x,y) ∈ A
+                bit_img[x,y] = 0
             end
         end
     end
@@ -120,3 +114,29 @@ function K3M!(bit_img,nr_iters)
     return bit_imgs,borders
 end
 
+
+
+#-----------------------------------------
+# Trial
+
+"""
+phase 1-5: Delete borders
+without if statement in double for loop.
+
+resulting K3M was a bit slower with this...
+maybe better if indexes array is pre allocated?
+"""
+function phaseᵢ_pif!(border,bit_img,N,A)
+    n,m = size(border)
+    indexes = Tuple.([id for id in CartesianIndices(bit_img) if 
+                (bit_img[id] == 1) &  # select indices of points that are in the skeleton
+                (1 < id[1] < n) &     # exclude boundaries
+                (1 < id[2] < m)
+    ])
+
+    for (x,y) in indexes
+        if weight(bit_img,N,x,y) ∈ A
+            bit_img[x,y] = 0
+        end
+    end
+end
