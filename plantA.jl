@@ -29,7 +29,6 @@ save("output/k3m.gif",results)
 save("output/k3m_b.gif",borders)
 
 skelet = results[:,:,end];
-<<<<<<< HEAD
 imshow(skelet)
 
 ##
@@ -46,7 +45,6 @@ pifv2 = detect_branching_pointsv2(skelet)
 pif_conv = detect_branching_points_conv(skelet)
 
 ##
-=======
 
 # Zwart wit skelet, maar met rgb type
 rgb_skelet = RGB.(skelet,skelet,skelet)
@@ -83,4 +81,3 @@ function write_to_png(guidict, filename)
     Cairo.write_to_png(ctx.surface, filename)
 end
 write_to_png(guidict,"annotated")
->>>>>>> 5e6034da3a52f1b62a671cdff8591364dada58a6

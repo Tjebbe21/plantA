@@ -1,11 +1,8 @@
 using StaticArrays
-<<<<<<< HEAD
 using DSP 
-=======
 using Printf
 using Combinatorics
 using AngleBetweenVectors # https://github.com/JeffreySarnoff/AngleBetweenVectors.jl
->>>>>>> 5e6034da3a52f1b62a671cdff8591364dada58a6
 
 """
 calculate weight to determine if point is a branchingpoint
@@ -183,7 +180,6 @@ function color_branching_points(skelet,color_bp,color_bp_nbh)
     end
     return skelet_colored
 end
-<<<<<<< HEAD
 
 function detect_branching_pointsv2(skelet)
     skelet_colored = RGB.(0,skelet,0)
@@ -205,5 +201,3 @@ function detect_branching_points_conv(skelet)
     end
     return skelet_colored
 end
-=======
->>>>>>> 5e6034da3a52f1b62a671cdff8591364dada58a6
