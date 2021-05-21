@@ -28,21 +28,10 @@ Set elements in zero array branchingpoints to 1 if that point is a branching poi
 branchingpoints: array filled with zeros
 skelet: 1 px wide binary image 
 """
-function branchingpoints!(branchingpoints,skelet)
-    n,m = size(skelet)
-    for x in 1:n, y in 1:m
-        if skelet[x,y] == 1
-            if branch_weight(skelet,x,y) ≥ 3
-                branchingpoints[x,y] = 1
-            end
-        end
-    end
-end
-
-function branchingpointsv2!(branchingpoints, skelet)
-    for I ∈ findall(skelet .== 1)
-        if branch_weight(skelet, I.I...) ≥ 3
-            branchingpoints[I] = 1
+function branchingpoints!(branchingpoints, skelet)
+    for idx ∈ findall(skelet .== 1)
+        if branch_weight(skelet, idx.I...) ≥ 3
+            branchingpoints[idx] = 1
         end
     end
 end
@@ -54,7 +43,7 @@ skelet: 1 px wide binary image
 """
 function idx_of_bp(skelet)
     branchingpoints = zero(skelet);
-    @time branchingpointsv2!(branchingpoints,skelet)
+    branchingpoints!(branchingpoints,skelet)
 
     idx_of_bp = [id for id in CartesianIndices(branchingpoints) if branchingpoints[id] == 1]
     return idx_of_bp
