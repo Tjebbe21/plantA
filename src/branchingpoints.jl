@@ -217,7 +217,6 @@ skelet: 1 px wide binary image
 
 color_bp:     color of branchingpoints
 color_bp_nbh: color of neighbor of branchingpoint
-color_skelet: color of skelet
 """
 function color_branching_points(skelet,color_bp,color_bp_nbh)
     n,m = size(skelet)
