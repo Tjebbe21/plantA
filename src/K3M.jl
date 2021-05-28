@@ -90,13 +90,15 @@ function K3M!(bit_img,nr_iters)
     
     n,m      = size(bit_img)       # img size
     border   = zeros(n,m)          # Bookeeping array
-    bit_imgs = zeros(n,m,nr_iters) # Save output of every iteration
-    borders  = zeros(n,m,nr_iters) # Save border of every iteration
+    bit_imgs = zeros(n,m,nr_iters+5) # Save output of every iteration
+    borders  = zeros(n,m,nr_iters+5) # Save border of every iteration
 
     # Make boundary (of 1 px wide) part of the background
     boundary_background(bit_img, 1)
+    
+    bit_imgs[:,:,1:5] .= bit_img   # few frames of start for gif
 
-    for i in 1:nr_iters
+    for i in 5:nr_iters+5
         bit_imgs[:,:,i] .= bit_img   # save bit_im
         
         phase0!(border,bit_img,N,A0) # marking borders
@@ -112,6 +114,20 @@ function K3M!(bit_img,nr_iters)
     phaseᵢ!(border,bit_img,N,A1px)   # thinning to a one-pixel width skeleton
     
     return bit_imgs,borders
+end
+
+"""
+input: binary image
+output: border of image
+"""
+function border(bit_img)
+    N  = SA[128 1 2; 64 0 4; 32 16 8];
+    A0 = SA[3, 6, 7, 12, 14, 15, 24, 28, 30, 31, 48, 56, 60, 62, 63, 96, 112, 120, 124, 126, 127, 129, 131, 135,143, 159, 191, 192, 193, 195, 199, 207, 223, 224, 225, 227, 231, 239, 240, 241, 243, 247, 248, 249, 251, 252, 253, 254];
+    
+    n, m   = size(bit_img)       # img size
+    border = zeros(n,m)          # Bookeeping array
+    phase0!(border,bit_img,N,A0)  # marking border 
+    return border
 end
 
 
