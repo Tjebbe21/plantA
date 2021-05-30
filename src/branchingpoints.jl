@@ -37,6 +37,8 @@ function branchingpoints!(branchingpoints, skelet)
 end
 
 """
+To do: replace this by findall(skelet .== 1)?
+
 returns list of CartesianIndices of branchingpoints
 
 skelet: 1 px wide binary image
@@ -59,7 +61,7 @@ returns
 - (direction, (0,0)) if there is no branch in direction
 - (direction, CartesianIndex) of branch after nr_steps or end of branch or next branching point
 """
-function few_steps_in_branch(rgb_skelet,idx,nr_steps,direction,color)
+function few_steps_in_branch(rgb_skelet,idx,nr_steps,direction,color;verbose=true)
     # initialize previous idx to branch point to avoid waking backwards
     previous_idx = idx
 
@@ -76,7 +78,9 @@ function few_steps_in_branch(rgb_skelet,idx,nr_steps,direction,color)
 
     # Return (direction, (0,0)) if there is no branch in direction (for type stabilty)
     if skelet[idx] != 1
-        println("no branch in direction: " * direction)
+        if verbose
+            println("no branch in direction: " * direction)
+        end
         return (direction, CartesianIndex(0,0))
     end
 
@@ -225,4 +229,108 @@ function color_branching_points(skelet,color_bp,color_bp_nbh)
         end
     end
     return skelet_colored
+end
+
+
+
+
+"""
+Returns angles of border px
+
+nr_steps is length of branch to calculate angles
+"""
+function angles_borderpoint(skelet,nr_steps)
+    indx_skelet = findall(skelet .== 1)
+    nr_border_points = length(indx_skelet)
+    angles = zeros(nr_border_points,6)
+
+    for i in 1:nr_border_points
+        idx = indx_skelet[i]
+
+        # Find end coordinates in the branches
+        coord_right  = few_steps_along_border(skelet,idx,nr_steps,"right")
+        coord_left   = few_steps_along_border(skelet,idx,nr_steps,"left")
+        coord_top    = few_steps_along_border(skelet,idx,nr_steps,"top")
+        coord_bottom = few_steps_along_border(skelet,idx,nr_steps,"bottom")
+
+        # Translate coordinates s.t. idx is origin (if branch is there)
+        # The != (0,0) is a choice for no branch in that direction in few_steps_along_border.
+        vecs = [(d, Float64.(Tuple(c  - idx))) for (d,c) in [coord_right,coord_left,coord_top,coord_bottom] if c != CartesianIndex(0,0)]
+        
+        # Calculate all possible pairs of branches
+        pers = combinations(vecs,2)
+        
+        # For every pair of branches calculate and print the angle between them
+        p_count = 1
+        for p in pers
+            p1, p2 = p
+            d1, c1 = p1
+            d2, c2 = p2
+            phi = angle(c1,c2) * 180/ π
+            angles[i,p_count] = phi 
+            p_count += 1
+            # @printf("angle between %6s and %6s = %3.1f deg\n",d1,d2,phi)
+        end
+    end
+    return angles
+end
+
+
+
+"""
+Paints nr_steps of branch in direction in color
+idx is starting branch point.
+
+returns 
+- (direction, (0,0)) if there is no branch in direction
+- (direction, CartesianIndex) of branch after nr_steps or end of branch or next branching point
+"""
+function few_steps_along_border(skelet,idx,nr_steps,direction)
+    # initialize previous idx to branch point to avoid waking backwards
+    previous_idx = idx
+
+    # Take first step in specified direction
+    if direction == "right"
+        idx = idx + CartesianIndex(0,1)
+    elseif direction == "left"
+        idx = idx + CartesianIndex(0,-1)
+    elseif direction == "top"
+        idx = idx + CartesianIndex(-1,0)
+    elseif direction == "bottom"
+        idx = idx + CartesianIndex(1,0)
+    end
+
+    # Return (direction, (0,0)) if there is no branch in direction (for type stabilty)
+    if skelet[idx] != 1
+        return (direction, CartesianIndex(0,0))
+    end
+    
+    # Take and paint nr_steps steps on the branch
+    for _ in 1:nr_steps
+        # define possible walking directions
+        below = idx + CartesianIndex(1,0)
+        top   = idx + CartesianIndex(-1,0)
+        right = idx + CartesianIndex(0,1)
+        left  = idx + CartesianIndex(0,-1)
+
+        # select next direction
+        directions = [dir for dir in [right,left,top,below] if (skelet[dir] == 1) && (dir != previous_idx)]
+       
+        # Set previous_idx to avoid waking backwards
+        previous_idx = idx
+
+        # Directions should have 1 length. Otherwise we encountered a new branchpoint on the branch or the end
+        if length(directions) == 1
+            idx = directions[1]
+        elseif length(directions) > 1
+            # println("multiple directions")
+            return (direction,idx)
+        elseif length(directions) == 0
+            # println("end of the branch")
+            return (direction,idx)
+        end
+    end
+
+    # return last coordinate
+    return (direction,idx)
 end
